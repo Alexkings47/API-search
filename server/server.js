@@ -13,7 +13,14 @@ client.connect().then(() => {
   let settings = { method: "Get" };
 
   fetch(url, settings)
-    .then((res) => res.json())
+    .then(async (res) => {
+
+      const contentType = res['headers'].get('content-type');
+      if (contentType == "text/plain; charset=utf-8") {
+        throw new Error(await res.text());
+      }
+      return res.json()
+    })
     .then(async (data) => {
       var response = data;
       // collection.
@@ -25,6 +32,9 @@ client.connect().then(() => {
             console.log("Inserting failed", err);
           });
       });
+    }).catch((err) => {
+      console.log("An error occurred fetching seed data: ", err);
+      process.exit(1);
     });
 });
 
